@@ -1,48 +1,3 @@
-// const {
-//     buildSchema,
-//     GraphQLObjectType,
-//     GraphQLSchema,
-//     GraphQLString,
-//     GraphQLInt,
-//     GraphQLList,
-//     GraphQLNonNull,
-//     GraphQLEnumType
-// } = require('graphql');
-// const { GraphQLID } = require('graphql/type/scalars');
-// const db = require('../models/userModels'); // Assume you have a database module for data fetching
-
-
-
-// const RootQueryType = new GraphQLObjectType({
-//     name: 'RootQueryType',
-//     fields: {
-        
-//     }
-// });
-
-// const RootMutationType = new GraphQLObjectType({
-//     name: 'RootMutationType',
-//     description: 'Root Mutation',
-//     fields: () => ({
-//       createUser: {
-//         type: UserType,
-//         description: 'Create a new user',
-//         args: {
-//             username: GraphQLNonNull(GraphQLString),
-//             email: GraphQLString,
-//             password: GraphQLString,
-//             role: RoleType,
-//         }
-//       }  
-//     })
-// });
-
-// module.exports = new GraphQLSchema({
-//     query: RootQueryType,
-//     mutation: RootMutationType
-// })
-
-
 const db = require('../models/userModels'); // Assume you have a database module for data fetching
 
 const resolvers = {
@@ -63,6 +18,24 @@ const resolvers = {
         async graphs(parent) {
             const graphs = await db.queryGraphs(parent.userId);
             return graphs;
+        }
+    },
+    Mutation: {
+        // async createUser(_, { username, email, hashWord, role }) {
+        async createUser(_, { newUser }) {
+            const { username, email, hashWord, role } = newUser;
+            const user = await db.createUser(username, email, hashWord, role);
+            return user;
+        },
+        async createGraph(_, { newGraph }) {
+            const { userId, graphName, nodes, edges } = newGraph;
+            const graph = await db.createGraph(userId, graphName, nodes, edges);
+            return graph;
+        },
+        async saveGraph(_, { graph }) {
+            const { userId, graphName, nodes, edges } = graph;
+            const updatedGraph = await db.saveGraph(userId, graphName, nodes, edges);
+            return updatedGraph;
         }
     }
 };

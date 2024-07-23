@@ -27,6 +27,8 @@ userController.hashing = async (req, res, next) => {
 userController.createUser = async (req, res, next) => {
   const { username, email } = req.body; // Extract username and email from request body
   const hashWord = res.locals.hashWord; // Retrieve hashed password from res.locals
+  // const role = req.body; // TODO - accept role from front end
+  const role = 'USER';
 
   // TODO - check that username doesn't already exist - Brian
   // try {
@@ -43,25 +45,41 @@ userController.createUser = async (req, res, next) => {
   // TODO - create unique user id for the new user
 
   // Insert credentials into database
-  const params = [username, hashWord, email]; // Define parameters for SQL query
-  const query = `INSERT INTO users(username, password, email) VALUES ($1, $2, $3) RETURNING *`; // Define SQL query string
-  db.query(query, params) // Execute SQL query with parameters
-    .then((createdUser) => {
-      // Handle successful user creation
-      res.locals.user = {
-        ...createdUser.rows[0], // Store created user information in res.locals
-      };
-      return next(); // Proceed to the next middleware
+  // const params = [username, hashWord, email]; // Define parameters for SQL query
+  // const query = `INSERT INTO users(username, password, email) VALUES ($1, $2, $3) RETURNING *`; // Define SQL query string
+  // db.query(query, params) // Execute SQL query with parameters
+  //   .then((createdUser) => {
+  //     // Handle successful user creation
+  //     res.locals.user = {
+  //       ...createdUser.rows[0], // Store created user information in res.locals
+  //       userId: createdUser.rows[0].user_id,
+  //     };
+  //     return next(); // Proceed to the next middleware
+  //   })
+  //   .catch((err) => {
+  //     // Error handling
+  //     console.log(err);
+  //     return next({
+  //       log: 'Error in userController.createUser',
+  //       status: 500,
+  //       message: { err: 'Error creating user' },
+  //     });
+  //   });
+
+  // graphQL layer
+  try {
+    const user = await db.createUser(username, email, hashWord, role);
+    // success
+    res.locals.user = user;
+    return next();
+  } catch (err) {
+    console.log(err);
+    return next({
+      log: 'Error in userController.createUser',
+      status: 500,
+      message: { err: 'Error creating user' },
     })
-    .catch((err) => {
-      // Error handling
-      console.log(err);
-      return next({
-        log: 'Error in userController.createUser',
-        status: 500,
-        message: { err: 'Error creating user' },
-      });
-    });
+  }
 };
 
 // Middleware for logging in a user

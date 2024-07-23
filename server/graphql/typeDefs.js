@@ -1,14 +1,12 @@
-const { gql } = require('graphql-tag');
-
-const typeDefs = gql`
+const typeDefs = `#graphql
 
     type User {
         userId: ID!,
         username: String!,
         email: String,
-        password: String,
+        hashWord: String,
         role: Role,
-        graphs: [Graph]
+        graphs: [Graph],
     }
 
     enum Role {
@@ -17,8 +15,8 @@ const typeDefs = gql`
     }
 
     type Graph {
-        graphId: ID,
-        userId: ID,
+        graphId: ID!,
+        user: User
         graphName: String,
         nodes: String,
         edges: String,
@@ -26,8 +24,39 @@ const typeDefs = gql`
 
     type Query {
         user(userId: ID!): User!
-        graph(graphId: ID!): Graph
-        graphs: [Graph]
+        graph(graphId: ID!): Graph!
+    }
+
+    type Mutation {
+        createUser( newUser: createUserInput! ): createUserResult,
+        createGraph ( newGraph: createGraphInput! ): Graph,
+        saveGraph ( updatedGraph: saveGraphInput! ): Graph,
+    }
+
+    input createUserInput {
+        username: String!,
+        email: String,
+        hashWord: String,
+        role: Role,
+    }
+    type createUserResult {
+        userId: ID!,
+        username: String!,
+        email: String!,
+    }
+
+    input createGraphInput {
+        userId: ID!,
+        graphName: String!,
+        nodes: String,
+        edges: String,
+    }
+
+    input saveGraphInput {
+        userId: ID!,
+        graphName: String!,
+        nodes: String!,
+        edges: String!,
     }
 `;
 

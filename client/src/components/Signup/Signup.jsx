@@ -75,7 +75,7 @@ function Signup() {
           const response = await axios.post('/api/auth/signup', formData);
           const data = response.data;
           setAuthState({
-            isAuth: false,
+            isAuth: true,
             username: data.username,
             userId: data.userId,
           });
