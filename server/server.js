@@ -1,13 +1,13 @@
-const path = require('path');
+const path = require("path");
 const express = require("express");
-const app = express();
+// const app = express();
 const bodyParser = require("body-parser");
 const cors = require("cors");
 
-const { ApolloServer } = require('@apollo/server');
-const { expressMiddleware } = require('@apollo/server/express4');
-const typeDefs = require('./graphql/typeDefs');
-const resolvers = require('./graphql/resolvers');
+const { ApolloServer } = require("@apollo/server");
+const { expressMiddleware } = require("@apollo/server/express4");
+const typeDefs = require("./graphql/typeDefs");
+const resolvers = require("./graphql/resolvers");
 // const schema = require('./graphql/schema');
 
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -19,56 +19,67 @@ app.use(cors());
 // app.use(express.static(path.join(__dirname, './../client/public')));
 
 // graphQL
-const server = new ApolloServer({
-  typeDefs,
-  resolvers,
-});
+async function startServer() {
+  const app = express();
 
-// async function for Apollo graphQL server
-const startServer = async () => {
-  try {
-    // apply Apollo GraphQL middleware
-    await server.start()
-    app.use('/graphql', cors(), express.json(), expressMiddleware(server));
-  
+  // Middleware for authentication
+  app.use((req, res, next) => {
+    next();
+  });
 
-    // Authorization Route
-    const authRouter = require('./routes/authRouter');
-    app.use('/api/auth', authRouter);
+  const server = new ApolloServer({
+    typeDefs,
+    resolvers,
+    context: ({ req }) => {
+      // request data sent to context
+      user: req.user;
+    },
+  });
 
-    // Graph Routes
-    const graphRouter = require('./routes/graphRouter');
-    app.use('/api/graph', graphRouter);
+  await server.start();
+  app.use("/graphql", expressMiddleware(server));
 
-    // app.use(express.static(path.join(__dirname, './../client/public')));
-
-    app.get("*", (req, res) => {
-      console.log('req.url', req.url);
-      // res.sendFile(path.join(__dirname, 'build', 'index.html'));
-    });
-
-    // Global error handler:
-    app.use((err, req, res, next) => {
-      console.log('GLOBAL ERROR HANDLER:', err);
-      const defaultErr = {
-        log: "Express error handler caught middleware error",
-        status: 500,
-        message: { err: "An error occurred" },
-      };
-      const errorObj = Object.assign({}, defaultErr, err);
-      console.log(errorObj.log);
-      return res.status(errorObj.status).json(errorObj.message);
-    });
-
-    app.listen(3000, () => {
-      console.log("listening on port 3000");
-    }); //listens on port 3000 -> http://localhost:3000/
-
-  } catch (err) {
-    console.log('Error starting the server:', err);
-  }
+  // Existing REST endpoints
+  app.use("/api", apiRouter);
 }
 
-startServer();
+startServer().catch((err) => {
+  console.err("Faileed to start server:", err);
+});
+
+// // apply Apollo GraphQL middleware
+// app.use("/graphql", cors(), express.json(), expressMiddleware(server));
+
+// // Authorization Route
+// const authRouter = require("./routes/authRouter");
+// app.use("/api/auth", authRouter);
+
+// // Graph Routes
+// const graphRouter = require("./routes/graphRouter");
+// app.use("/api/graph", graphRouter);
+
+// // app.use(express.static(path.join(__dirname, './../client/public')));
+
+// app.get("*", (req, res) => {
+//   console.log("req.url", req.url);
+//   // res.sendFile(path.join(__dirname, 'build', 'index.html'));
+// });
+
+// Global error handler:
+app.use((err, req, res, next) => {
+  console.log("GLOBAL ERROR HANDLER:", err);
+  const defaultErr = {
+    log: "Express error handler caught middleware error",
+    status: 500,
+    message: { err: "An error occurred" },
+  };
+  const errorObj = Object.assign({}, defaultErr, err);
+  console.log(errorObj.log);
+  return res.status(errorObj.status).json(errorObj.message);
+});
+
+app.listen(3000, () => {
+  console.log("listening on port 3000");
+}); //listens on port 3000 -> http://localhost:3000/
 
 module.exports = app;
