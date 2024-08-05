@@ -46,6 +46,26 @@ const authResolvers = {
       const token = auth.createAuthToken(user);
       return { user, token };
     },
+    async validateSession(_, { token }, context) {
+      // once it reaches this endpoint, we can assume that: no token, or token is valid
+      console.log(context);
+      // no user, so no token is saved
+      if (!context.currentUser) {
+        // return invalid session
+        // TODO - not sure if should reutrn null or throw error
+        // return null;
+        throw GraphQLError("No authorization token.", {
+          extensions: {
+            code: "UNAUTHORIZED",
+            statusCode: 401,
+          },
+        });
+      } else {
+        // token is valid
+        // return valid session
+        return { user: context.currentUser, token };
+      }
+    },
     async createGraph(_, { newGraph }, context) {
       // check that user authenticated
       if (!context.currentUser)

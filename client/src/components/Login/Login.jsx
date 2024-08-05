@@ -1,4 +1,3 @@
-import axios from 'axios';
 import React, { useContext, useState, useEffect } from 'react';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import Button from '@mui/material/Button';
@@ -12,6 +11,10 @@ import { useAuth } from "../../contexts/AuthContext";
 import Navbar from '../Navbar/Navbar';
 
 import { useNavigate } from 'react-router-dom';
+
+// graphql
+import graphqlClient from '../../graphql/graphqlClient';
+import { LOGIN_USER } from '../../graphql/mutations';
 
 const theme = createTheme({
   palette: {
@@ -37,41 +40,60 @@ function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // await login(username, password);
-
-    // send request to server to login user
+    
+    // POST request to server
     try {
-      const response = await axios.post('/api/auth/login', {
-        username,
-        password,
-      });
+      const { user, token } = await graphqlClient(LOGIN_USER, { username, password });
+      console.log('user', user)
+      console.log('token', token)
       // success
-      const data = response.data;
       setAuthState({
         isAuth: true,
         username: data.username,
         userId: data.userId,
-      });
-      console.log('logged in - saving to local storage');
-      localStorage.setItem("username", data.username);
-      localStorage.setItem("userId", data.userId);
-      localStorage.setItem("token", response.headers['authorization']);
+      })
+      localStorage.setItem("username", user.username);
+      localStorage.setItem("userId", user.userId);
+      localStorage.setItem("token", token);
       return navigate('/dashboard');
     } catch (err) {
-      if (err.response) {
-        // fail - unable to log in
-        // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
-        console.log('Failed to login. Error response data:', err.response.data);
-        console.log('Failed to login. Error response status:', err.response.status);
-      } else if (err.request) {
-        // The request was made but no response was received
-        console.log('Error request:', err.request);
-      } else {
-        // Something happened in setting up the request that triggered an Error
-        console.log('Error message:', err.message);
-      }
+      // fail unable to login
+      console.error(err);
     }
+
+    // send request to server to login user
+    // try {
+    //   const response = await axios.post('/api/auth/login', {
+    //     username,
+    //     password,
+    //   });
+    //   // success
+    //   const data = response.data;
+    //   setAuthState({
+    //     isAuth: true,
+    //     username: data.username,
+    //     userId: data.userId,
+    //   });
+    //   console.log('logged in - saving to local storage');
+    //   localStorage.setItem("username", data.username);
+    //   localStorage.setItem("userId", data.userId);
+    //   localStorage.setItem("token", response.headers['authorization']);
+    //   return navigate('/dashboard');
+    // } catch (err) {
+    //   if (err.response) {
+    //     // fail - unable to log in
+    //     // The request was made and the server responded with a status code
+    //     // that falls out of the range of 2xx
+    //     console.log('Failed to login. Error response data:', err.response.data);
+    //     console.log('Failed to login. Error response status:', err.response.status);
+    //   } else if (err.request) {
+    //     // The request was made but no response was received
+    //     console.log('Error request:', err.request);
+    //   } else {
+    //     // Something happened in setting up the request that triggered an Error
+    //     console.log('Error message:', err.message);
+    //   }
+    // }
   }
 
   return (

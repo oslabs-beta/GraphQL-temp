@@ -14,7 +14,7 @@ const authorize = (req, res, next) => {
   // get JWT from req.headers
   // const authToken = req.headers.authorization?.split(" ")[1];
   const authToken = req.headers.authorization?.split(" ")[0];
-  console.log("authToken", authToken);
+  console.log("authToken:", authToken);
   if (!authToken) {
     console.error("Missing Auth Token");
     // missing auth header
@@ -24,8 +24,13 @@ const authorize = (req, res, next) => {
     return next();
   } else {
     // validate
-    req.currentUser = auth.verifyAuthToken(authToken);
-    return next();
+    try {
+      req.currentUser = auth.verifyAuthToken(authToken);
+      return next();
+    } catch (err) {
+      console.error("JWT verification failed:", err);
+      res.status(401).json({ error: "Unauthorized" });
+    }
   }
 };
 
