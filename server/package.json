@@ -4,7 +4,7 @@
   "main": "server.js",
   "scripts": {
     "start": "nodemon server.js",
-    "dev": "nodemon server.js",
+    "dev": "NODE_ENV=development nodemon server.js ",
     "test": " jest __tests__/**/*.test.js",
     "serve-client": "serve -s ../client/build",
     "concurrently-dev": "concurrently \"npm run dev\" \"npm run serve-client\""
@@ -13,6 +13,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@graphql-tools/load-files": "^7.0.0",
+    "@graphql-tools/schema": "^10.0.4",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.2",
     "chai": "^5.1.1",

@@ -1,0 +1,64 @@
+type Query {
+  user(userId: ID!): User
+  graph(graphId: ID!): Graph
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+type User {
+  userId: ID!
+  username: String!
+  email: String
+  hashWord: String
+  role: Role
+  graphs: [Graph]
+}
+
+type Graph {
+  graphId: ID!
+  graphName: String!
+  nodes: String
+  edges: String
+  user: User
+}
+
+type Mutation {
+  createUser(newUser: createUserInput!): AuthPayload!
+  loginUser(currentUser: loginUserInput!): AuthPayload!
+  createGraph(newGraph: createGraphInput!): Graph
+  saveGraph(updatedGraph: saveGraphInput!): Graph
+}
+
+input createUserInput {
+  username: String!
+  email: String
+  password: String
+  role: Role
+}
+
+input loginUserInput {
+  username: String!
+  password: String!
+}
+
+type AuthPayload {
+  user: User
+  token: String
+}
+
+input createGraphInput {
+  userId: ID!
+  graphName: String!
+  nodes: String
+  edges: String
+}
+
+input saveGraphInput {
+  userId: ID!
+  graphName: String!
+  nodes: String!
+  edges: String!
+}

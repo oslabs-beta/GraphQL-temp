@@ -1,11 +1,16 @@
+const { loadFilesSync } = require("@graphql-tools/load-files");
 const { makeExecutableSchema } = require("@graphql-tools/schema");
-const typeDefs = require("./typeDefs");
-const resolvers = require("./resolvers");
+const path = require("path");
 
-// create the schema
+const typeDefs = loadFilesSync(path.join(__dirname, "./schema.graphql"));
+
+const authResolvers = require("./authResolvers");
+const schemaResolvers = require("./schemaResolvers");
+const resolvers = [authResolvers, schemaResolvers];
+
 const schema = makeExecutableSchema({
-  typeDefs: typeDefs,
-  resolvers: resolvers,
+  typeDefs,
+  resolvers,
 });
 
 module.exports = schema;
