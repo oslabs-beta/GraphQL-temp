@@ -1,15 +1,21 @@
 // called from auth context
 export const VALIDATE_SESSION = `
     mutation ($token: String!) {
-        user
-        token
+        validateSession (token: $token) {
+            user {
+                userId
+                username
+                role
+            }
+            token
+        }
     }
 `;
 
 // called from login page
 export const LOGIN_USER = `
-    mutation ($currentUser: loginUserInput!) {
-        loginUser (currentUser: $currentUser) {
+    mutation ($userCreds: loginUserInput!) {
+        loginUser (userCreds: $userCreds) {
             user {
                 userId
                 username

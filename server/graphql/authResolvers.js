@@ -8,6 +8,7 @@ const auth = require("../auth");
 const authResolvers = {
   Mutation: {
     async createUser(_, { newUser }, context) {
+      console.log("mutate createUser");
       // ensure user not currently signed in
       if (context.currentUser)
         throw new GraphQLError("User logged in. Cannot create new user.", {
@@ -21,13 +22,14 @@ const authResolvers = {
       const token = auth.createAuthToken(user);
       return { user, token };
     },
-    async loginUser(_, { currentUser }, context) {
-      const { username, password } = currentUser;
+    async loginUser(_, { userCreds }, context) {
+      console.log("mutate loginUser");
+      const { username, password } = userCreds;
       // ensure user not currently signed in
-      if (context.currentUser)
-        throw new GraphQLError("User logged in. Cannot login again.", {
-          extensions: { code: "UNAUTHORIZED", statusCode: 401 },
-        });
+      // if (context.currentUser)
+      //   throw new GraphQLError("User logged in. Cannot login again.", {
+      //     extensions: { code: "UNAUTHORIZED", statusCode: 401 },
+      //   });
       // query user from databse
       const user = await db.queryUsername(username);
       // validate password -- catch error on front-end
@@ -47,8 +49,8 @@ const authResolvers = {
       return { user, token };
     },
     async validateSession(_, { token }, context) {
+      console.log("mutate validateSesssion");
       // once it reaches this endpoint, we can assume that: no token, or token is valid
-      console.log(context);
       // no user, so no token is saved
       if (!context.currentUser) {
         // return invalid session
@@ -67,6 +69,7 @@ const authResolvers = {
       }
     },
     async createGraph(_, { newGraph }, context) {
+      console.log("mutate createGraph");
       // check that user authenticated
       if (!context.currentUser)
         throw newGraphQLError("User not logged in. Cannot create new graph.", {
@@ -77,6 +80,7 @@ const authResolvers = {
       return graph;
     },
     async saveGraph(_, { graph }, context) {
+      console.log("mutate saveGraph");
       // check that user authenticated
       if (!context.currentUser)
         throw newGraphQLError("User not logged in. Cannot save graph.", {

@@ -2,16 +2,24 @@ import axios from "axios";
 
 const graphqlClient = async (query, variables) => {
   try {
-    const response = await axios.post("/graphql", {
-      headers: {
-        authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-      body: {
+    console.log("query:", query);
+    const response = await axios.post(
+      "/api",
+      {
         query,
         variables,
       },
-    });
-    return response.data;
+      {
+        headers: {
+          "Content-Type": "application/json",
+          authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      }
+    );
+    if (response.status !== 200) {
+      console.log(response.message);
+    }
+    return response;
   } catch (err) {
     console.error("GraphQL request failed:", err);
     throw err;

@@ -1,6 +1,8 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
+import React, { createContext, useState, useEffect, useContext } from "react";
 // import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+// graphQL
+import graphqlClient from "../graphql/graphqlClient";
+import { VALIDATE_SESSION } from "../graphql/mutations";
 
 export const AuthContext = createContext();
 
@@ -28,64 +30,48 @@ export const AuthProvider = ({ children }) => {
       }
 
       // verify user token
-      let config = {
-        headers: { authorization: `${token}` },
-      };
       try {
-        const response = await axios.post('/api/auth/protected', {}, config);
+        const response = await graphqlClient(VALIDATE_SESSION, {
+          token: `${token}`,
+        });
         if (response.status !== 200) {
-          console.log('response.message:', response.message);
-          console.log(
-            'Unable to verify user. Reponse status: ',
-            response.status
-          );
+          // fail
           setAuthState({
             isAuth: false,
             username: "",
             userId: null,
-            loading: false, // Set loading to false when done
+            loading: false,
           });
           // TODO - create refresh token
         } else {
-          // successful login
-          const data = response.data;
-          localStorage.setItem("username", data.username);
-          localStorage.setItem("userId", data.userId);
-          localStorage.setItem("token", response.headers['authorization']);
+          // success
+          const { user, token } = response.data.data.validateSession;
+          // console.log("user:", user);
+          // console.log("token:", token);
           setAuthState({
             isAuth: true,
-            username: data.username,
-            userId: data.userId,
-            loading: false, // Set loading to false when done
+            username: user.username,
+            userId: user.userId,
+            loading: false,
           });
+          localStorage.setItem("username", user.username);
+          localStorage.setItem("userId", user.userId);
+          localStorage.setItem("token", token);
         }
       } catch (err) {
-        if (err.response) {
-          // The request was made and the server responded with a status code
-          // that falls out of the range of 2xx
-          if (err.response.status === 401) {
-            console.log('Error verifying user token');
-            setAuthState({
-              isAuth: false,
-              username: "",
-              userId: null,
-              loading: false,
-            });
-            localStorage.removeItem("username");
-            localStorage.removeItem("userId");
-            localStorage.removeItem('token');
-            
-          }
-          console.log('Error response data:', err.response.data);
-          console.log('Error response status:', err.response.status);
-        } else if (error.request) {
-          // The request was made but no response was received
-          console.log('Error request:', err.request);
-        } else {
-          // Something happened in setting up the request that triggered an Error
-          console.log('Error message:', err.message);
+        console.error("Error validating session:", err);
+        if (err.response.status === 401) {
+          console.log("Error verifying user token");
+          setAuthState({
+            isAuth: false,
+            username: "",
+            userId: null,
+            loading: false,
+          });
+          localStorage.removeItem("username");
+          localStorage.removeItem("userId");
+          localStorage.removeItem("token");
         }
-        // return navigate('/login');
       }
     }
     verifyUser();

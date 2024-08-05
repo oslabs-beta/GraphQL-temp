@@ -15,7 +15,6 @@ const verifyAuthToken = async (authToken) => {
   // decode token
   // const { userId, username } = jwt.verify(authToken, JWT_SECRET);
   const decoded = jwt.verify(authToken, JWT_SECRET);
-  console.log(decoded);
   if (decoded) console.log("Token Validated. Decoded:", decoded);
   // return decoded user
   return await db.queryUserId(decoded.userId);

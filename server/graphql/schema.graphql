@@ -27,7 +27,7 @@ type Graph {
 
 type Mutation {
   createUser(newUser: createUserInput!): AuthPayload!
-  loginUser(currentUser: loginUserInput!): AuthPayload!
+  loginUser(userCreds: loginUserInput!): AuthPayload!
   validateSession(token: String!): AuthPayload
   createGraph(newGraph: createGraphInput!): Graph
   saveGraph(updatedGraph: saveGraphInput!): Graph
