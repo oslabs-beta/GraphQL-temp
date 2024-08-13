@@ -144,21 +144,23 @@ db.createGraph = async (userId, graphName, nodes, edges) => {
     RETURNING *`;
   try {
     const response = await db.query(query, params);
+    // success
+    return {
+      graphId: response.rows[0].graph_id,
+      // user?
+      graphName: response.rows[0].user,
+      nodes: response.rows[0].nodes,
+      edges: response.rows[0].edges,
+    };
   } catch (err) {
     console.error(`Unable to create graph for user ${userId}`);
     throw new Error(err);
   }
-  // success
-  return {
-    graphId: response.rows[0].graph_id,
-    // user?
-    graphName: response.rows[0].user,
-    nodes: response.rows[0].nodes,
-    edges: response.rows[0].edges,
-  };
 };
 
-db.saveGraph = async (userId, graphName, nodes, edges) => {
+db.saveGraph = async (userId, graphName, graphId, nodes, edges) => {
+  if (!userId || !graphName || !graphId || !nodes || !edges)
+    throw new Error("Missing graph information. Unable to save.");
   // save functionality for graph
   const params = [graphName, nodes, edges, graphId, userId];
   const query = `
@@ -168,18 +170,18 @@ db.saveGraph = async (userId, graphName, nodes, edges) => {
     RETURNING *`;
   try {
     const response = await db.query(query, params);
+    // success
+    return {
+      // userId: response.rows[0].user_id,
+      graphName: response.rows[0].graph_name,
+      graphId: response.rows[0].graph_id,
+      nodes: response.rows[0].nodes,
+      edges: response.rows[0].edges,
+    };
   } catch (err) {
     console.error(`Unable to save graph ${graphName}`);
     throw new Error(err);
   }
-  // success
-  return {
-    // userId: response.rows[0].user_id,
-    graphName: response.rows[0].graph_name,
-    graphId: response.rows[0].graph_id,
-    nodes: response.rows[0].nodes,
-    edges: response.rows[0].edges,
-  };
 };
 
 // export an object with query property that returns an invocation of pool.query

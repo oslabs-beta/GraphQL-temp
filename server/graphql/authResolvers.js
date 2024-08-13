@@ -75,23 +75,34 @@ const authResolvers = {
       console.log("mutate createGraph");
       // check that user authenticated
       if (!context.currentUser)
-        throw newGraphQLError("User not logged in. Cannot create new graph.", {
+        throw new GraphQLError("User not logged in. Cannot create new graph.", {
           extensions: { code: "UNAUTHORIZED", statusCode: 401 },
         });
       const { userId, graphName, nodes, edges } = newGraph;
       const graph = await db.createGraph(userId, graphName, nodes, edges);
       return graph;
     },
-    async saveGraph(_, { graph }, context) {
+    async saveGraph(_, { updatedGraph }, context) {
       console.log("mutate saveGraph");
       // check that user authenticated
       if (!context.currentUser)
         throw newGraphQLError("User not logged in. Cannot save graph.", {
           extensions: { code: "UNAUTHORIZED", statusCode: 401 },
         });
-      const { userId, graphName, nodes, edges } = graph;
-      const updatedGraph = await db.saveGraph(userId, graphName, nodes, edges);
-      return updatedGraph;
+      if (!updatedGraph)
+        throw new GraphQLError(
+          "Missing graph infomartion. Unable to save graph."
+        );
+      const { userId, graphName, graphId, nodes, edges } = updatedGraph;
+      const graph = await db.saveGraph(
+        userId,
+        graphName,
+        graphId,
+        nodes,
+        edges
+      );
+      console.log("graph:", graph);
+      return graph;
     },
   },
 };

@@ -19,6 +19,12 @@ const graphqlClient = async (query, variables) => {
     if (response.status !== 200) {
       console.log(response.message);
     }
+    if (response.data.errors) {
+      for (let error of response.data.errors) {
+        console.error(error);
+      }
+      throw new Error("GraphQL error:", response.data.errors[0]);
+    }
     return response;
   } catch (err) {
     console.error("GraphQL request failed:", err);

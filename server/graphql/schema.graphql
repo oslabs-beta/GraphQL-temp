@@ -59,6 +59,7 @@ input createGraphInput {
 
 input saveGraphInput {
   userId: ID!
+  graphId: ID!
   graphName: String!
   nodes: String!
   edges: String!

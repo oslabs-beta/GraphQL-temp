@@ -1,4 +1,3 @@
-import axios from 'axios';
 import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import ReactFlow, {
@@ -27,6 +26,8 @@ import { useGraphContext } from '../../contexts/GraphContext';
 // graphQL
 import graphqlClient from '../../graphql/graphqlClient';
 import { GET_SINGLE_GRAPH } from '../../graphql/queries';
+import { SAVE_GRAPH } from '../../graphql/mutations';
+
 
 const TableNode = React.memo(({ data, id, selected }) => (
   <div
@@ -164,14 +165,13 @@ const SchemaVisualizer = ({ sqlContents, handleUploadBtn }) => {
   useEffect(() => {
     const fetchGraphData = async () => {
       // fetch graph data from server
-      console.log('url:', `/graph/${userId}/${graphId}`);
+      // console.log('url:', `/graph/${userId}/${graphId}`);
       try {
         const response = await graphqlClient(GET_SINGLE_GRAPH, { graphId });
         let { graph } = response.data.data;
         let serverNodes, serverEdges;
-        console.log('response.data.data:', response.data.data);
-        graph.nodes === '' ? serverNodes = [] : serverNodes = JSON.parse(response.data.nodes);
-        graph.edges === '' ? serverEdges = [] : serverEdges = JSON.parse(response.data.edges);
+        graph.nodes === '' ? serverNodes = [] : serverNodes = JSON.parse(graph.nodes);
+        graph.edges === '' ? serverEdges = [] : serverEdges = JSON.parse(graph.edges);
         setGraphName(graph.graphName);
         setNodes(serverNodes);
         setEdges(serverEdges);
@@ -188,39 +188,23 @@ const SchemaVisualizer = ({ sqlContents, handleUploadBtn }) => {
     // convert nodes and edges to string
     const nodeString = JSON.stringify(nodes);
     const edgeString = JSON.stringify(edges);
-
-    // console.log('nodes:', nodeString)
-    // console.log('edges:', edgeString)
-    console.log('userId:', userId)
-    console.log('graphName:', graphName)
-    
-    // send POST request to /api/graph/:userId/:graphId
-    const config = {
-      headers: { authorization: localStorage.getItem('token') },
-    }
-    const payload = {
-      username: username,
-      userId: userId,
-      graphName: graphName,
-      graphId: graphId,
-      nodes: nodeString,
-      edges: edgeString,
-    };
+    // mutation - save graph
     try {
-      // const response = await axios.put(`/api/graph/${userId}/${graphId}`, payload, config);
+      const response = await graphqlClient(SAVE_GRAPH, {
+        'updatedGraph': {
+          userId: userId,
+          graphName: graphName,
+          graphId: graphId,
+          nodes: nodeString,
+          edges: edgeString,
+        }
+      });
       // success
-      console.log('Successfully saved node graph to database');
+      console.log('Successfully saved graph to database');
       console.log('response:', response)
     } catch (err) {
-      if (err.response) {
-        // request made, server responded with status code outside of 2xx range
-        console.log('Failed ot save graph data:', err.respones.data);
-        console.log('Failed ot save graph status:', err.respones.status);
-      } else if (err.request) {
-        console.log('Error request:', err.request);
-      } else {
-        console.log('Error message:', err.message);
-      }
+      console.log(`Unable to save graph ${graphName}`);
+      console.log(err);
     }
   }
 
