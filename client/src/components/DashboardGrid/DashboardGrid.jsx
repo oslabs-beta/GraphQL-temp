@@ -1,10 +1,13 @@
-import axios from 'axios';
 import React, { useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useGraphContext } from '../../contexts/GraphContext';
 import GraphCard from '../GraphCard/GraphCard';
 import addGraph from '../../assets/logos/addGraph.png';
 import './dashboardgrid.scss';
+
+// graphQL
+import graphqlClient from '../../graphql/graphqlClient';
+import { GET_GRAPHS } from '../../graphql/queries';
 
 const DashboardGrid = ({ handleModalOpen, handleModalClose }) => {
     const { graphList, setGraphList } = useGraphContext();
@@ -13,32 +16,27 @@ const DashboardGrid = ({ handleModalOpen, handleModalClose }) => {
     // fetch user's graphList
     useEffect(() => {
         const fetchGraphList = async () => {
-            // define request header and payload
-            const config = {
-                headers: { authorization: localStorage.getItem('token') }
-            };
             try {
-                const response = await axios.get(`/api/graph/${userId}`, config);
+                // fetch from database
+                const response = await graphqlClient(GET_GRAPHS, {
+                    userId: localStorage.getItem('userId'),
+                });
                 // success
-                // console.log('graphList response:', response);
-                setGraphList(response.data.graphList);
-            } catch(err) {
-                if (err.reponse) {
-                    console.log('Failed to fetch graphList. Error response:', err.response);
-                    console.log('Failed to fetch graphList. Error status:', err.status);
-                } else if (err.request) {
-                    console.log('Error request:', err.request);
-                } else {
-                    console.log('Error message:', err.message);
-                }
+                const data = response.data.data;
+                const user = data.user;
+                const { graphs } = user;
+                setGraphList(graphs);
+            } catch (err) {
+                console.log(`Failed to fetch graph list for user: ${localStorage.getItem('username')}`);
+                console.log("error:", err);
             }
         }
         fetchGraphList();
         return;
-    }, [])
+    }, []);
 
     const graphCards = graphList.map((graph) => {
-        return <GraphCard key={graph.graph_id} graphId={graph.graph_id} graphName={graph.graph_name}></GraphCard>
+        return <GraphCard key={crypto.randomUUID()} graphId={graph.graphId} graphName={graph.graphName}></GraphCard>
     })
 
     return (

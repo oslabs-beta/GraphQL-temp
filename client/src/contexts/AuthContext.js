@@ -45,7 +45,9 @@ export const AuthProvider = ({ children }) => {
           // TODO - create refresh token
         } else {
           // success
-          const { user, token } = response.data.data.validateSession;
+          const data = response.data.data.validateSession;
+          const { user, token } = data;
+          // console.log("data:", data);
           // console.log("user:", user);
           // console.log("token:", token);
           setAuthState({

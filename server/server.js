@@ -14,7 +14,7 @@ app.use(cors());
 app.use(express.json());
 
 // define authentication middleware -- mutates req object passed as graph context
-const authorize = (req, res, next) => {
+const authorize = async (req, res, next) => {
   console.log("req.headers.authorization:", req.headers.authorization);
   // get JWT from req.headers
   // const authToken = req.headers.authorization?.split(" ")[1];
@@ -30,7 +30,9 @@ const authorize = (req, res, next) => {
     // validate
     console.log("Validating JWT...");
     try {
-      req.currentUser = auth.verifyAuthToken(authToken);
+      req.currentUser = await auth.verifyAuthToken(authToken);
+      // console.log("req.currentUser:", req.currentUser);
+      // console.log("next()");
       return next();
     } catch (err) {
       console.error("JWT verification failed:", err);

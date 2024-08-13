@@ -18,6 +18,8 @@ const authResolvers = {
       // hash the users password -- catch error on the front-end
       const hashWord = await bcrypt.hash(password, SALT_ROUNDS);
       const user = await db.createUser(username, email, hashWord, role);
+      // success
+      delete user.hashWord; // prevent password from being sent to client
       // generate JWT
       const token = auth.createAuthToken(user);
       return { user, token };
@@ -44,6 +46,7 @@ const authResolvers = {
         });
       }
       // success
+      delete user.hashWord; // prevent password from being sent to client
       // generate JWT
       const token = auth.createAuthToken(user);
       return { user, token };
