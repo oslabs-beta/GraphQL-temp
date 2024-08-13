@@ -24,6 +24,10 @@ import { useTheme } from '../../contexts/ThemeContext'
 import { useAuth } from '../../contexts/AuthContext';
 import { useGraphContext } from '../../contexts/GraphContext';
 
+// graphQL
+import graphqlClient from '../../graphql/graphqlClient';
+import { GET_SINGLE_GRAPH } from '../../graphql/queries';
+
 const TableNode = React.memo(({ data, id, selected }) => (
   <div
     style={{
@@ -159,32 +163,20 @@ const SchemaVisualizer = ({ sqlContents, handleUploadBtn }) => {
 
   useEffect(() => {
     const fetchGraphData = async () => {
-      // fetch from server
-      // console.log(`/graph/${userId}/${graphId}`);
-      const config = {
-        headers: { authorization: localStorage.getItem("token") },
-      }
+      // fetch graph data from server
+      console.log('url:', `/graph/${userId}/${graphId}`);
       try {
-        // GET from server
-        const response = await axios.get(`/api/graph/${userId}/${graphId}`, config);
+        const response = await graphqlClient(GET_SINGLE_GRAPH, { graphId });
+        let { graph } = response.data.data;
         let serverNodes, serverEdges;
-        response.data.nodes === '' ? serverNodes = [] : serverNodes = JSON.parse(response.data.nodes);
-        response.data.edges === '' ? serverEdges = [] : serverEdges = JSON.parse(response.data.edges);
-
-        setGraphName(response.data.graphName);
+        console.log('response.data.data:', response.data.data);
+        graph.nodes === '' ? serverNodes = [] : serverNodes = JSON.parse(response.data.nodes);
+        graph.edges === '' ? serverEdges = [] : serverEdges = JSON.parse(response.data.edges);
+        setGraphName(graph.graphName);
         setNodes(serverNodes);
         setEdges(serverEdges);
       } catch (err) {
-        if (err.response) {
-          // fail - unable to log in
-          // request made, server responded with status code outside of 2xx range
-          console.log('Failed to pull graph. Error response data:', err.response.data);
-          console.log('Failed to pull graph. Error response status:', err.response.status);
-        } else if (err.request) {
-          console.log('Error request:', err.request);
-        } else {
-          console.log('Error message:', err.message);
-        }
+        console.log('Error fetching graph:', err);
         navigate('/dashboard');
       }
     }
@@ -215,7 +207,7 @@ const SchemaVisualizer = ({ sqlContents, handleUploadBtn }) => {
       edges: edgeString,
     };
     try {
-      const response = await axios.put(`/api/graph/${userId}/${graphId}`, payload, config);
+      // const response = await axios.put(`/api/graph/${userId}/${graphId}`, payload, config);
       // success
       console.log('Successfully saved node graph to database');
       console.log('response:', response)

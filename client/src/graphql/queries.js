@@ -17,7 +17,7 @@ export const GET_GRAPHS = `
 // called from graph page
 export const GET_SINGLE_GRAPH = `
     query ($graphId: ID!) {
-        graph {
+        graph (graphId: $graphId) {
             graphId
             graphName
             nodes
