@@ -6,6 +6,10 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { useAuth } from '../../contexts/AuthContext';
 import { useGraphContext } from '../../contexts/GraphContext';
 
+// graphQL
+import graphqlClient from '../../graphql/graphqlClient';
+import { CREATE_GRAPH } from '../../graphql/mutations';
+
 // Modal will pop up only when user creates new graph
 const ModalGraphName = (props) => {
     const navigate = useNavigate();
@@ -14,49 +18,33 @@ const ModalGraphName = (props) => {
     // const { graphId, setGraphId } = useGraphContext();
     const { modalVisibility, handleModalClose } = props;
 
-    
-
     const handleGraphNameSubmit = async () => {
         // send POST request to server
-        const userId = authState.userId;
-        const config = {
-            headers: { authorization: localStorage.getItem("token") },
-        }
-        const payload = {
-            username: authState.username,
-            userId: authState.userId,
-            graphName: graphName,
-        }
+        const { userId } = authState;
+        
+        // mutation - createGraph
         try {
-            const response = await axios.post(`/api/graph/${userId}`, payload, config);
-            console.log(response);
+            const response = await graphqlClient(CREATE_GRAPH, {
+                newGraph: {
+                    userId,
+                    graphName,
+                    nodes: "",
+                    edges: "",
+                }
+            });
+            // success
+            const graph = response.data.data.createGraph
+            setGraphName(graph.graphName);
 
-            // Update graph state - save graph_name, graph_id
-            setGraphName(response.data.graphName)
-            setGraphName(response.data.graphId)
-
-            // redirect to /graph/:userId/:graphId
-            if (response.data) {
-                return navigate(`/graph/${response.data.userId}/${response.data.graphId}`)
-            } else {
-                throw Error('Response missing data');
-            }
+            return navigate(`/graph/${userId}/${graph.graphId}`);
         } catch (err) {
-            if (graphName === '') console.log('Graph name cannot be empty');
-            else if (err.response) {
-                // fail - unable to create graph
-                console.log('Failed to create graph. Error responese data:', err.reponse);
-                // console.log('Failed to create graph. Error responese status:', err.reponse.status);
-            } else if (err.request) {
-                console.log('Error request:', err.request);
-            } else {
-                console.log('Error message:', err.message);
-            }
+            console.error('Unable to create new graph', graphName);
+            console.error(err);
         }
-        // console.log('Submitted Graph Name:', graphName);
+        console.log(`Graph "${graphName}" successfully created`);
         // hide modal
         // handleModalClose();
-        // return;
+        return;
     }
 
     const colors = {

@@ -148,7 +148,7 @@ db.createGraph = async (userId, graphName, nodes, edges) => {
     return {
       graphId: response.rows[0].graph_id,
       // user?
-      graphName: response.rows[0].user,
+      graphName: response.rows[0].graph_name,
       nodes: response.rows[0].nodes,
       edges: response.rows[0].edges,
     };

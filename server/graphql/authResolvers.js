@@ -101,7 +101,6 @@ const authResolvers = {
         nodes,
         edges
       );
-      console.log("graph:", graph);
       return graph;
     },
   },
