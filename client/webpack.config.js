@@ -7,7 +7,7 @@ const BundleAnalyzerPlugin =
 
 module.exports = {
   entry: "./src/index.js",
-  mode: process.env.NODE_ENV === "production" ? "production" : "development",
+  mode: process.env.NODE_ENV || "development",
   output: {
     filename: "[name].[contenthash].js",
     path: path.resolve(__dirname, "build"),

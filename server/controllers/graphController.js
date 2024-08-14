@@ -11,16 +11,33 @@ graphController.createGraph = async (req, res, next) => {
     }
     const nodeString = '', edgeString = '';  // initialize as empty
 
-    const params = [userId, graphName, nodeString, edgeString];
-    const query = `
-        INSERT INTO graphs(user_id, graph_name, nodes, edges)
-        VALUES ($1, $2, $3, $4)
-        RETURNING *`;
+    // const params = [userId, graphName, nodeString, edgeString];
+    // const query = `
+    //     INSERT INTO graphs(user_id, graph_name, nodes, edges)
+    //     VALUES ($1, $2, $3, $4)
+    //     RETURNING *`;
+    // try {
+    //     const newGraph = await db.query(query, params);
+    //     // success
+    //     res.locals.user.graphId = newGraph.rows[0].graph_id;
+    //     res.locals.user.graphName = newGraph.rows[0].graph_name;
+    //     return next();
+    // } catch (err) {
+    //     // fail
+    //     console.log(err);
+    //     return next({
+    //         log: 'Error in graphController.createGraph',
+    //         message: `Unable to create new graph for user ${res.locals.user.username} and graph name ${graphName}`,
+    //         status: 409,
+    //     });
+    // }
+
+    // graphQL layer
     try {
-        const newGraph = await db.query(query, params);
+        const newGraph = await db.createGraph(userId, graphName, nodeString, edgeString);
         // success
-        res.locals.user.graphId = newGraph.rows[0].graph_id;
-        res.locals.user.graphName = newGraph.rows[0].graph_name;
+        res.locals.user.graphId = newGraph.graphId;
+        res.locals.user.graphName = newGraph.graphName;
         return next();
     } catch (err) {
         // fail
@@ -103,21 +120,39 @@ graphController.saveGraph = async (req, res, next) => {
         return res.status(422).json({ error: 'Missing required parameters' });
     }
     // Update the database
-    const params = [graphName, nodes, edges, graphId, userId];
-    const query = `
-    UPDATE graphs
-    SET graph_name = $1, nodes = $2, edges = $3
-    WHERE graph_id = $4 AND user_id = $5
-    RETURNING *`
+    // const params = [graphName, nodes, edges, graphId, userId];
+    // const query = `
+    // UPDATE graphs
+    // SET graph_name = $1, nodes = $2, edges = $3
+    // WHERE graph_id = $4 AND user_id = $5
+    // RETURNING *`
+    // try {
+    //     const updatedGraph = await db.query(query, params);
+    //     // success
+    //     res.locals.user.userId = updatedGraph.rows[0].user_id;
+    //     res.locals.user.graphName = updatedGraph.rows[0].graph_name;
+    //     res.locals.user.graphId = updatedGraph.rows[0].graph_id;
+    //     res.locals.user.nodes = updatedGraph.rows[0].nodes;
+    //     res.locals.user.edges = updatedGraph.rows[0].edges;
+    //     return next();
+    // } catch (err) {
+    //     console.log(err);
+    //     return next({
+    //         log: 'Error in graphController.saveGraph',
+    //         message: 'Unable to update graph in database',
+    //         status: 500,
+    //     })
+    // }
+
+    // graphQL layer
     try {
-        const updatedGraph = await db.query(query, params);
+        const updatedGraph = await db.saveGraph(query, params);
         // success
-        res.locals.user.userId = updatedGraph.rows[0].user_id;
-        res.locals.user.graphName = updatedGraph.rows[0].graph_name;
-        res.locals.user.graphId = updatedGraph.rows[0].graph_id;
-        res.locals.user.nodes = updatedGraph.rows[0].nodes;
-        res.locals.user.edges = updatedGraph.rows[0].edges;
-        return next();
+        res.locals.user.userId = updatedGraph.user_id;
+        res.locals.user.graphName = updatedGraph.graph_name;
+        res.locals.user.graphId = updatedGraph.graph_id;
+        res.locals.user.nodes = updatedGraph.nodes;
+        res.locals.user.edges = updatedGraph.edges;
     } catch (err) {
         console.log(err);
         return next({
