@@ -29,6 +29,7 @@ jest.mock('../controllers/userController', () => ({
 }));
 
 describe('Auth Router', () => {
+    // Test Creating new user and if user object with token
     describe('POST /signup', () => {
         it('should create a new user and return user object with token', async () => {
             const response = await request(app)
@@ -40,7 +41,7 @@ describe('Auth Router', () => {
             expect(response.body).toHaveProperty('token', 'fake-jwt-token');
         });
     });
-
+    // Test user login and return user object with token
     describe('POST /login', () => {
         it('should login user and return user object with token', async () => {
             const response = await request(app)
@@ -52,7 +53,7 @@ describe('Auth Router', () => {
             expect(response.body).toHaveProperty('token', 'fake-jwt-token');
         });
     });
-
+    // Test if user has been authenticated and accessible to proceed on protected routes
     describe('POST /protected', () => {
         it('should access protected route with valid token', async () => {
             const response = await request(app)

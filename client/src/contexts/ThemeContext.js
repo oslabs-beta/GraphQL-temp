@@ -1,7 +1,7 @@
 import React, { createContext, useState, useContext } from 'react';
 
 const ThemeContext = createContext();
-
+// Dark Mode Features
 export const ThemeProvider = ({ children }) => {
     const [darkMode, setDarkMode] = useState(false);
 

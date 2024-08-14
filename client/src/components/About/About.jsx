@@ -1,8 +1,7 @@
 import React from 'react';
-
 import Navbar from '../Navbar/Navbar';
 import './about.scss';
-
+// JSX to define About page
 const About = () => {
   return (
     <>

@@ -1,9 +1,27 @@
-/client/node_modules
-/client/package-lock.json
-/server/node_modules
-/server/package-lock.json
-/server/.env
+# Node.js dependencies
 /node_modules
-package.json
-package-lock.json
+/client/node_modules
+/server/node_modules
+
+# Dependency lock files
+/package-lock.json
+/client/package-lock.json
+/server/package-lock.json
+
+# Environment files
+/server/.env
+
+# macOS Finder metadata
 .DS_Store
+
+# Build directories (if you use build tools that output to specific directories)
+client/build
+server/build
+
+# Logs
+*.log
+
+# Miscellaneous
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

@@ -1,79 +1,224 @@
-@import '../../assets/styles/variables.scss';
+@import "../../assets/styles/variables.scss";
 
 .navbar {
-    width: 100%;
-    height: 4.5rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 20px;
-    background-color: $color-white;
+  width: 100%;
+  height: 4.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  background-color: $color-white;
 }
 
 .logo-container {
-    display: flex;
-    align-items: center;
-    // border: 2px solid red;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  width: 10rem;
+  // border: 2px solid red;
 }
 
 .smallLogo {
-    height: 2.4rem;
-    margin-right: 10px;
+  height: 2.4rem;
+  margin-right: 10px;
 }
 
 .navbar .logo {
-    font-size: 35px;
-    font-weight: bold;
-    color: $color-black;
-    text-decoration: none;
+  font-size: 35px;
+  font-weight: bold;
+  color: $color-black;
+  text-decoration: none;
 }
 
 .logo {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    // border: solid 1px green;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  // border: solid 1px green;
 }
 
 .logo-text {
-    transform: translateY(-.04em);
+  transform: translateY(-0.04em);
 }
 
 .nav-links {
-    list-style: none;
-    display: flex;
-    justify-content: space-between;
-    width: 22rem;
-    // background-color: red;
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  width: 28rem;
+  //   background-color: red;
 }
 
 .nav-link {
-    text-decoration: none;
-    color: $color-black;
-    font-size: 23px;
-    font-weight: bold;
-    opacity: 50%;
-
-    
+  text-decoration: none;
+  color: $color-black;
+  font-size: 1.8rem;
+  font-weight: bold;
+  opacity: 50%;
 }
 
 .active {
-    opacity: 100%;
+  opacity: 100%;
 }
 
-
 .social-icons {
-    width: 7rem;
-    display: flex;
-    justify-content: space-between;
+  width: 10rem;
+  display: flex;
+  justify-content: flex-end;
 }
 
 .navbar .social-icons a {
-    // margin-left: 15px;
-    color: $color-black;
+  // margin-left: 15px;
+  color: $color-black;
 }
 
-.githubLogo, .linkedIn {
-    width: 2.4rem;
-    height: 2.4rem;
+.githubLogo,
+.linkedIn {
+  width: 2.4rem;
+  height: 2.4rem;
+  margin-left: 2rem;
+}
+
+// @media (max-width: 1300px) {
+//   .nav-links {
+//     width: 22rem;
+//   }
+//   .nav-link {
+//     font-size: 1.6rem;
+//   }
+// }
+
+// @media (max-width: 800px) {
+//   .nav-links {
+//     width: 17rem;
+//   }
+//   .nav-link {
+//     font-size: 1.4rem;
+//   }
+// }
+@media (max-width: 1400px) {
+  .navbar {
+    padding: 8px 16px;
+  }
+
+  .logo-container {
+    width: 9rem;
+  }
+
+  .navbar .logo {
+    font-size: 32px;
+  }
+
+  .nav-links {
+    width: 26rem;
+  }
+
+  .nav-link {
+    font-size: 1.7rem;
+  }
+
+  .githubLogo,
+  .linkedIn {
+    width: 2.2rem;
+    height: 2.2rem;
+    margin-left: 1.8rem;
+  }
+}
+
+@media (max-width: 1300px) {
+  .navbar {
+    height: 4rem;
+  }
+
+  .smallLogo {
+    height: 2.2rem;
+  }
+
+  .navbar .logo {
+    font-size: 30px;
+  }
+
+  .nav-links {
+    width: 22rem;
+  }
+
+  .nav-link {
+    font-size: 1.6rem;
+  }
+
+  .social-icons {
+    width: 9rem;
+  }
+}
+
+@media (max-width: 1000px) {
+  .navbar {
+    height: 3.5rem;
+    padding: 6px 12px;
+  }
+
+  .logo-container {
+    width: 8rem;
+  }
+
+  .smallLogo {
+    height: 2rem;
+  }
+
+  .navbar .logo {
+    font-size: 26px;
+  }
+
+  .nav-links {
+    width: 20rem;
+  }
+
+  .nav-link {
+    font-size: 1.4rem;
+  }
+
+  .social-icons {
+    width: 8rem;
+  }
+
+  .githubLogo,
+  .linkedIn {
+    width: 2rem;
+    height: 2rem;
+    margin-left: 1.5rem;
+  }
+}
+
+@media (max-width: 800px) {
+  .navbar {
+    height: 3rem;
+    padding: 4px 8px;
+  }
+
+  .logo-container {
+    width: 7rem;
+  }
+
+  .smallLogo {
+    height: 1.8rem;
+  }
+
+  .navbar .logo {
+    font-size: 22px;
+  }
+
+  .nav-link {
+    font-size: 1.2rem;
+  }
+
+  .social-icons {
+    width: 7rem;
+  }
+
+  .githubLogo,
+  .linkedIn {
+    width: 1.8rem;
+    height: 1.8rem;
+    margin-left: 1.2rem;
+  }
 }

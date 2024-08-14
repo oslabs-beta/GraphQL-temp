@@ -1,28 +1,27 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { Suspense, lazy } from "react";
 import { BrowserRouter, Route, Routes, Outlet, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from "./contexts/AuthContext.js";
 import { ThemeProvider } from "./contexts/ThemeContext.js";
 import "./index.scss"
 
-import Main from "./components/Main/Main";
-import Signup from "./components/Signup/Signup";
-import Login from "./components/Login/Login";
-import Team from './components/Team/Team';
-import About from './components/About/About';
-import Dashboard from './components/Dashboard/Dashboard';
-import Graph from './components/Graph/Graph';
+const Main = lazy(() => import("./components/Main/Main"));
+const Signup = lazy(() => import("./components/Signup/Signup"));
+const Login = lazy(() => import("./components/Login/Login"));
+const Team = lazy(() => import('./components/Team/Team'));
+const About = lazy(() => import('./components/About/About'));
+const Dashboard = lazy(() => import('./components/Dashboard/Dashboard'));
+const Graph = lazy(() => import('./components/Graph/Graph'));
 import { GraphProvider } from './contexts/GraphContext';
+
+const Loading = () => <div>Loading...</div>;
 
 // A wrapper for <Route> that redirects to the login page if the user is not authenticated.
 const PrivateRoutes = () => {
     const { authState, setAuthState } = useAuth();
     
     if (authState.loading) {
-        // Can return a loading spinner component or any loading UI here
-        console.log('Loading...');
         return <div>Loading...</div>;
     }
-    console.log('PrivateRoutes - isAuth:', authState.isAuth);
     if (!authState.isAuth) {
         return <Navigate to="/login" />;
     }
@@ -33,29 +32,33 @@ const PrivateRoutes = () => {
         </GraphProvider>
     )
 };
- const App = () =>{
-    return(
+
+const AppRoutes = () => (
+    <Suspense fallback={<Loading />}>
+        <Routes>
+            <Route path="/" element={<Main />} />
+            <Route path="/team" element={<Team />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/about" element={<About />} />
+            <Route element={<PrivateRoutes />}>
+                <Route path="/graph/:userId/:graphId" element={<Graph />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+            </Route>
+        </Routes>
+    </Suspense>
+);
+
+const App = () => {
+    return (
         <AuthProvider>
             <BrowserRouter>
                 <ThemeProvider>
-                    <Routes>
-                        <Route path="/" element={<Main />} />
-                        <Route path="/team" element={<Team />} />
-                        <Route path="/signup" element={<Signup />} />
-                        <Route path="/login" element={<Login />} />
-                        <Route path="/about" element={<About />} />
-                        {/* private routes */}
-                        <Route element={<PrivateRoutes />}>
-                            <Route path="/graph/:userId/:graphId" element={<Graph />} />
-                            <Route path="/dashboard" element={<Dashboard />} />
-                            {/* Add more private routes here */}
-                        </Route>
-                    </Routes>
+                    <AppRoutes />
                 </ThemeProvider>
             </BrowserRouter>
         </AuthProvider>
-            
-    )
-}
+    );
+};
 
 export default App;

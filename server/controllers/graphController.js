@@ -5,9 +5,7 @@ const graphController = {};
 graphController.createGraph = async (req, res, next) => {
     // create new graph in database
     const { userId, graphName } = req.body;
-    // console.log('userId:', userId);
-    // console.log('graphName:', graphName);
-    // console.log('graphName === undefined:', graphName === "");
+    
     if (!userId || !graphName) {
         return res.status(422).json({ error: 'Missing required parameters' });
     }

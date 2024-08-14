@@ -9,6 +9,7 @@ import './dashboardgrid.scss';
 import graphqlClient from '../../graphql/graphqlClient';
 import { GET_GRAPHS } from '../../graphql/queries';
 
+// Defining Dashboard Grid upon specific user's graph list
 const DashboardGrid = ({ handleModalOpen, handleModalClose }) => {
     const { graphList, setGraphList } = useGraphContext();
     const { username, userId } = useAuth();
@@ -38,7 +39,7 @@ const DashboardGrid = ({ handleModalOpen, handleModalClose }) => {
     const graphCards = graphList.map((graph) => {
         return <GraphCard key={crypto.randomUUID()} graphId={graph.graphId} graphName={graph.graphName}></GraphCard>
     })
-
+    // JSX to define our Dashboard Grid div
     return (
         <div className="dashboard-grid">
             {/* <div className="add-graph-section">

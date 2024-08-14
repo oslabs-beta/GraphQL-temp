@@ -1,92 +1,91 @@
-@import '../../assets/styles/variables.scss';
+@import "../../assets/styles/variables.scss";
 
 @mixin color-opacity($property, $color, $opacity) {
-    $r: red($color);
-    $g: green($color);
-    $b: blue($color);
-    // border-bottom: 2px solid rgba($r, $g, $b, $opacity);
-    #{$property}: rgba($r, $g, $b, $opacity);
+  $r: red($color);
+  $g: green($color);
+  $b: blue($color);
+  // border-bottom: 2px solid rgba($r, $g, $b, $opacity);
+  #{$property}: rgba($r, $g, $b, $opacity);
 }
 
 .sidebar {
-    position: relative;
-    // max-height: calc(100vh - 4.5rem);
-    width: 300px;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    border-width: 2px;
-    border-style: solid;
-    @include color-opacity(border-color, $color-black, 10%);
-    // border: solid 3px green;
+  position: relative;
+  // max-height: calc(100vh - 4.5rem);
+  width: 300px;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-width: 2px;
+  border-style: solid;
+  @include color-opacity(border-color, $color-black, 10%);
+  // border: solid 3px green;
 
-    background-color: $color-white;
-    color: $color-black;
+  background-color: $color-white;
+  color: $color-black;
 
-    &.dark {
-        background-color: $color-black;
-        color: $color-white;
-        @include color-opacity(border-color, $color-white, 10%);
-    }
+  &.dark {
+    background-color: $color-black;
+    color: $color-white;
+    @include color-opacity(border-color, $color-white, 10%);
+  }
 }
 
 .sidebar-top {
-    padding: 1rem .5rem 0;
-    .sidebar-heading {
-        font-size: 1.5rem;
-        font-weight: 600;
-        text-align: center;
-    }
+  padding: 1rem 0.5rem 0;
+  .sidebar-heading {
+    font-size: 1.5rem;
+    font-weight: 600;
+    text-align: center;
+  }
 }
 
 .sidebar-bottom {
-    // background-color: $color-white;
-    width: 100%;
-    position: absolute;
-    bottom: 0;
-    z-index: 2;
-    padding-top: 1rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background-color: inherit;
+  // background-color: $color-white;
+  width: 100%;
+  position: absolute;
+  bottom: 0;
+  z-index: 2;
+  padding-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: inherit;
 
+  button {
+    margin-bottom: 1rem;
+  }
 
-    button {
-        margin-bottom: 1rem;
+  .btn-graph {
+    cursor: pointer;
+    border-radius: 0.5em;
+    width: 12rem;
+    height: 3.5rem;
+    font-weight: 600;
+    font-size: 1.2rem;
+    color: $color-white;
+    transition: transform 100ms ease-in;
+
+    &:hover {
+      transform: translateY(-1px);
+      transition: transform 100ms ease-in;
     }
+  }
 
-    .btn-graph {
-        cursor: pointer;
-        border-radius: .5em;
-        width: 12rem;
-        height: 3.5rem;
-        font-weight: 600;
-        font-size: 1.2rem;
-        color: $color-white;
-        transition: transform 100ms ease-in;
+  .btn-add-node {
+    background-color: $color-primary;
+    border: none;
+  }
 
-        &:hover {
-            transform: translateY(-1px);
-            transition: transform 100ms ease-in;
-        }
+  .btn-clear {
+    background-color: $color-white;
+    color: $color-primary;
+    border: 2px solid $color-primary;
+
+    .dark & {
+      background-color: $color-black;
+      color: $color-primary;
+      border-color: $color-primary;
     }
-    
-    .btn-add-node {
-        background-color: $color-primary;
-        border: none;
-    }
-
-    .btn-clear {
-        background-color: $color-white;
-        color: $color-primary;
-        border: 2px solid $color-primary;
-
-        .dark & {
-            background-color: $color-black;
-            color: $color-primary;
-            border-color: $color-primary;
-        }
-    }
+  }
 }

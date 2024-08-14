@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
 import './dashboard.scss';
 
+// Defining Dashboard Component
 function Dashboard() {
   const { darkMode } = useTheme();
   const [ modalVisibility, setModalVisibility ] = useState(false);
@@ -19,7 +20,7 @@ function Dashboard() {
     // e.preventDefault();
     setModalVisibility(false);
   }
-
+  // JSX to define Dashboard Page
   return (
     <>
       <ModalGraphName modalVisibility={modalVisibility} handleModalClose={handleModalClose}/>

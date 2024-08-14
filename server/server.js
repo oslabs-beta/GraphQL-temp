@@ -1,3 +1,4 @@
+const path = require("path");
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
@@ -12,6 +13,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cors());
 app.use(express.json());
+
+// static files
+app.use(express.static(path.join(__dirname, "../client/build")));
 
 // define authentication middleware -- mutates req object passed as graph context
 const authorize = async (req, res, next) => {
@@ -60,6 +64,24 @@ app.use(
     },
   })
 );
+
+// catch-all route
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../client/build"));
+});
+
+// Global error handler:
+app.use((err, req, res, next) => {
+  // console.log("GLOBAL ERROR HANDLER:", err);
+  const defaultErr = {
+    log: "Express error handler caught middleware error",
+    status: 500,
+    message: { err: "An error occurred" },
+  };
+  const errorObj = Object.assign({}, defaultErr, err);
+  console.log(errorObj.log);
+  return res.status(errorObj.status).json(errorObj.message);
+});
 
 app.listen(PORT, () => console.log(`Listening on port ${PORT}`));
 

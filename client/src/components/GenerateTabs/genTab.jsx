@@ -12,14 +12,14 @@ import {
   ButtonGroup,
   IconButton,
   Snackbar,
-  Alert
+  Alert,
 } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import '../NodeSchema/schemavisualizer.scss';
 import schemaGenerator from '../algorithms/schema_generator';
 import resolverGenerator from '../algorithms/resolver_generator';
 import './gentab.scss';
-
+// Defined Custom Tab Panel to pass down probs and manage children component
 function CustomTabPanel(props) {
   const { children, value, index, ...other } = props;
 
@@ -35,7 +35,7 @@ function CustomTabPanel(props) {
     </div>
   );
 }
-
+// a11yProps defined to enhance the accessiblity of tabs
 function a11yProps(index) {
   return {
     id: `simple-tab-${index}`,
@@ -43,8 +43,7 @@ function a11yProps(index) {
   };
 }
 
-
-
+// BasicTabs defined to hold inner tabs - child component
 function BasicTabs({ generatedSchema, generatedResolver }) {
   const [value, setValue] = useState(0);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -55,7 +54,6 @@ function BasicTabs({ generatedSchema, generatedResolver }) {
   };
 
   function handleCopy(text) {
-    console.log(text);
     navigator.clipboard
       .writeText(text)
       .then(() => {
@@ -72,8 +70,8 @@ function BasicTabs({ generatedSchema, generatedResolver }) {
 
   function handleSnackbarClose() {
     setSnackbarOpen(false);
-  } 
-
+  }
+  // JSX to construct Inner Tab - Child
   return (
     <>
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
@@ -82,8 +80,8 @@ function BasicTabs({ generatedSchema, generatedResolver }) {
           onChange={handleChange}
           aria-label='basic tabs example'
         >
-          <Tab label='TypeDef' {...a11yProps(0)} />
-          <Tab label='Resolver' {...a11yProps(1)} />
+          <Tab label='TypeDef' {...a11yProps(0)} key='0' />
+          <Tab label='Resolver' {...a11yProps(1)} key='1' />
         </Tabs>
       </Box>
       <CustomTabPanel value={value} index={0}>
@@ -97,15 +95,16 @@ function BasicTabs({ generatedSchema, generatedResolver }) {
         </Box>
 
         {generatedSchema.map((item, index) => (
-           <Box
+          <Box
+            key={crypto.randomUUID()}
             sx={{
               backgroundColor: '#2d2d2d',
               color: '#f8f8f2',
               overflowX: 'auto',
               '& pre, & code': {
                 whiteSpace: 'pre-wrap',
-                wordWrap: 'break-word'
-              }
+                wordWrap: 'break-word',
+              },
             }}
           >
             <pre style={{ margin: 0 }}>
@@ -125,14 +124,15 @@ function BasicTabs({ generatedSchema, generatedResolver }) {
         </Box>
         {generatedResolver.map((item, index) => (
           <Box
+            key={crypto.randomUUID()}
             sx={{
               backgroundColor: '#2d2d2d',
               color: '#f8f8f2',
               overflowX: 'auto',
               '& pre, & code': {
                 whiteSpace: 'pre-wrap',
-                wordWrap: 'break-word'
-              }
+                wordWrap: 'break-word',
+              },
             }}
           >
             <pre style={{ margin: 0 }}>
@@ -141,15 +141,17 @@ function BasicTabs({ generatedSchema, generatedResolver }) {
           </Box>
         ))}
       </CustomTabPanel>
-      <Snackbar open={snackbarOpen} onClose={handleSnackbarClose} autoHideDuration={3000}>
-        <Alert onClose={handleSnackbarClose}>
-          {snackbarMessage}
-        </Alert>
+      <Snackbar
+        open={snackbarOpen}
+        onClose={handleSnackbarClose}
+        autoHideDuration={3000}
+      >
+        <Alert onClose={handleSnackbarClose}>{snackbarMessage}</Alert>
       </Snackbar>
     </>
   );
 }
-
+// Defining Main Tab Functionality - contains BasicTabs
 const GenerateTab = ({ open, onClose, nodes, edges }) => {
   // Storing ER of Schema Generator Function
 
@@ -159,40 +161,17 @@ const GenerateTab = ({ open, onClose, nodes, edges }) => {
   let generatedResolverData = [];
   if (open) generatedResolverData = resolverGenerator(nodes, edges);
 
-  //  const [generatedSchemaData, setGeneratedSchemaData] = useState(null);
-  //  const [generatedResolverData, setGeneratedResolverData] = useState(null);
-
-  // const [open, setOpen] = React.useState(false);
-
-  // const handleClickOpen = () => {
-  //   setOpen(true);
-  // };
-
-  // const handleClose = () => {
-  //   setOpen(false);
-  // };
-
-  // useEffect(() => {
-  //   // if(open && nodes && nodes.length > 0) {
-  //   //   console.log('test')
-  //     const schemaData = schemaGenerator(nodes, edges);
-  //     setGeneratedSchemaData(schemaData);
-  //     const resolverData = resolverGenerator(nodes, edges);
-  //     setGeneratedResolverData(resolverData);
-  //   // }
-
-  // }, [open, nodes, edges])
-
   if (!open) return null;
-
+  // JSX to construct GenerateTab popup tab
   return (
     <div className='generate-tab-container'>
-      <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+      <Dialog open={open} onClose={onClose} maxWidth='md' fullWidth>
         <DialogTitle>Tabs</DialogTitle>
         <DialogContent>
           <BasicTabs
             generatedSchema={generatedSchemaData}
             generatedResolver={generatedResolverData}
+            key='0'
           />
         </DialogContent>
         <DialogActions>

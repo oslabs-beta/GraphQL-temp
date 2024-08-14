@@ -1,1 +1,14 @@
 @import '../../assets/styles/variables.scss';
+
+.signup-hero-img {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 3rem;
+}
+
+@media (max-width: 800px) {
+  .signup-hero-img {
+    margin-top: 2rem;
+  }
+}

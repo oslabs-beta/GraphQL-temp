@@ -1,0 +1,21 @@
+{
+  "name": "moleqlar",
+  "version": "1.0.0",
+  "scripts": {
+    "heroku-postbuild": "NPM_CONFIG_PRODUCTION=false npm install --prefix client && npm run build --prefix client && npm install --prefix server",
+    "build": "cd client && npm install && npm run build",
+    "start": "cd server && npm install && npm start",
+    "clean": "rm -rf /client/build"
+  },
+  "engines": {
+    "node": "16.x"
+  },
+  "dependencies": {
+    "webpack-cli": "^5.1.4"
+  },
+  "devDependencies": {
+    "image-webpack-loader": "^8.1.0",
+    "mini-css-extract-plugin": "^2.9.0",
+    "webpack-bundle-analyzer": "^4.10.2"
+  }
+}

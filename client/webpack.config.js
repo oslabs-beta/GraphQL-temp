@@ -1,16 +1,18 @@
 const path = require("path");
 const HtmlWebPackPlugin = require("html-webpack-plugin");
 const Dotenv = require("dotenv-webpack");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const BundleAnalyzerPlugin =
+  require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 
 module.exports = {
   entry: "./src/index.js",
   mode: process.env.NODE_ENV || "development",
   output: {
-    filename: "bundle.js",
+    filename: "[name].[contenthash].js",
     path: path.resolve(__dirname, "build"),
     publicPath: "/",
   },
-
   module: {
     rules: [
       {
@@ -27,19 +29,21 @@ module.exports = {
           },
         },
       },
-
       {
-        test: /\.s?css/,
-        use: ["style-loader", "css-loader", "sass-loader"],
+        test: /\.s?css$/,
+        use: [MiniCssExtractPlugin.loader, "css-loader", "sass-loader"],
       },
       {
         test: /\.(png|jpg|gif|svg)$/,
         use: [
+          "file-loader",
           {
-            loader: "file-loader",
+            loader: "image-webpack-loader",
             options: {
-              name: "[name].[ext]",
-              outputPath: "images/",
+              mozjpeg: {
+                progressive: true,
+                quality: 65,
+              },
             },
           },
         ],
@@ -52,12 +56,16 @@ module.exports = {
   plugins: [
     new HtmlWebPackPlugin({
       template: "./public/index.html",
+      favicon: "./public/smallLogo.png",
     }),
     new Dotenv({
-      path: path.resolve(__dirname, "../server/.env"), // Path to .env file in the server folder
-      safe: true, // Load '.env.example' to verify the '.env' variables are all set. Can also be a string to a different file.
+      path: path.resolve(__dirname, "../server/.env"),
     }),
-  ],
+    new MiniCssExtractPlugin({
+      filename: "[name].[contenthash].css",
+    }),
+    process.env.ANALYZE && new BundleAnalyzerPlugin(),
+  ].filter(Boolean),
   devServer: {
     historyApiFallback: true,
     static: {
@@ -71,5 +79,28 @@ module.exports = {
         target: "http://localhost:3000",
       },
     ],
+  },
+  optimization: {
+    splitChunks: {
+      chunks: "all",
+      maxInitialRequests: Infinity,
+      minSize: 0,
+      cacheGroups: {
+        vendor: {
+          test: /[\\/]node_modules[\\/]/,
+          name(module) {
+            const packageName = module.context.match(
+              /[\\/]node_modules[\\/](.*?)([\\/]|$)/
+            )[1];
+            return `npm.${packageName.replace("@", "")}`;
+          },
+        },
+      },
+    },
+  },
+  performance: {
+    hints: "warning",
+    maxEntrypointSize: 512000,
+    maxAssetSize: 512000,
   },
 };

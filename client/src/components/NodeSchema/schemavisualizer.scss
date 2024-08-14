@@ -1,76 +1,81 @@
-@import '../../assets/styles/variables.scss';
+@import "../../assets/styles/variables.scss";
 
 .schema-visualizer {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    overflow: hidden;
-    flex-grow: 1;
-    // border: 5px solid magenta;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  overflow: hidden;
+  flex-grow: 1;
+  // border: 5px solid magenta;
 }
 
 .node-graph-container {
-    position: relative;
-    flex-grow: 1;
-    background: $color-white; 
+  position: relative;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  background: $color-white;
 
-    &.dark {
-        background: $color-black;
-    }
+  &.dark {
+    background: $color-black;
+  }
 }
 
 .node-graph {
-    background-color: $color-white;
+  width: 100%;
+  height: 100%;
+  flex-grow: 1;
+  background-color: $color-white;
 
-    &.dark {
-        background-color: $color-black;
-    }
+  &.dark {
+    background-color: $color-black;
+  }
 }
 
 // buttons start
 .graph-btn-container {
-    position: absolute;
-    z-index: 1;
-    top: 1rem;
-    right: 1rem;
+  position: absolute;
+  z-index: 1;
+  top: 1rem;
+  right: 1rem;
 }
 
 .btn-graph {
-    cursor: pointer;
-    border-radius: .5em;
-    width: 12rem;
-    height: 3.5rem;
-    font-weight: 600;
-    font-size: 1.2rem;
-    color: $color-white;
-    transition: transform 100ms ease-in;
+  cursor: pointer;
+  border-radius: 0.5em;
+  width: 12rem;
+  height: 3.5rem;
+  font-weight: 600;
+  font-size: 1.2rem;
+  color: $color-white;
+  transition: transform 100ms ease-in;
 
-    &:hover {
-      transform: translateY(-1px);
-      transition: transform 100ms ease-in;
-    }
+  &:hover {
+    transform: translateY(-1px);
+    transition: transform 100ms ease-in;
+  }
 }
 
 .btn-save {
-    background-color: $color-primary;
-    margin-left: 1rem;
+  background-color: $color-primary;
+  margin-left: 1rem;
 }
 
 .generate {
-    width: min-content;
-    height: min-content;
-    top: auto;
-    bottom: 2rem;
+  width: min-content;
+  height: min-content;
+  top: auto;
+  bottom: 2rem;
 }
 
 .btn-generate {
-    background-color: $color-primary;
-    // background-color: $color-primary;
-    // border: $color-white solid .2em;
-    // font-size: 1.4rem;
-    // width: 14rem;
-    // height: 4rem;
+  background-color: $color-primary;
+  // background-color: $color-primary;
+  // border: $color-white solid .2em;
+  // font-size: 1.4rem;
+  // width: 14rem;
+  // height: 4rem;
 }
 // buttons end

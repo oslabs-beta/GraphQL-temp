@@ -3,9 +3,7 @@
 .about-section {
   text-align: center;
   padding: 50px 20px;
-  //background-color: white;
   color: black;
-  //border-color:rgb(172, 48, 172) ;
 }
 
 .about-section h2 {
@@ -32,4 +30,72 @@
 .about-footer p {
   font-size: 17px;
   color: white;
+}
+
+// 响应式设计
+@media (max-width: 1400px) {
+  .about-section h2 {
+    font-size: 32px;
+  }
+
+  .about-section p {
+    font-size: 17px;
+    max-width: 750px;
+  }
+}
+
+@media (max-width: 1300px) {
+  .about-section {
+    padding: 40px 15px;
+  }
+
+  .about-section h2 {
+    font-size: 30px;
+  }
+
+  .about-section p {
+    font-size: 16px;
+    max-width: 700px;
+  }
+}
+
+@media (max-width: 1000px) {
+  .about-section h2 {
+    font-size: 28px;
+  }
+
+  .about-section p {
+    font-size: 15px;
+    max-width: 600px;
+  }
+
+  .about-footer p {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 800px) {
+  .about-section {
+    padding: 30px 10px;
+  }
+
+  .about-section h2 {
+    font-size: 24px;
+    margin-bottom: 15px;
+  }
+
+  .about-section p {
+    font-size: 14px;
+    margin: 15px 0;
+    max-width: 100%;
+  }
+
+  .about-footer {
+    padding: 15px 0;
+    margin-top: 30px;
+  }
+
+  .about-footer p {
+    font-size: 13px;
+  }
 }

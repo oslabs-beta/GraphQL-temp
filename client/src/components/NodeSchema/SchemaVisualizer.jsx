@@ -11,17 +11,15 @@ import ReactFlow, {
   Handle,
   Position,
 } from 'reactflow';
-import { Box, Button } from '@mui/material';
 import { parseSqlSchema } from '../algorithms/schema_parser';
-import { schemaGenerator } from '../algorithms/schema_generator';
-import { resolverGenerator } from '../algorithms/resolver_generator';
 import NodeList from './NodeList';
-import './schemavisualizer.scss';  // styles
-import GenerateTab from "../GenerateTabs/genTab";
-import { useTheme } from '../../contexts/ThemeContext'
+import './schemavisualizer.scss'; // styles
+import GenerateTab from '../GenerateTabs/genTab';
+import { useTheme } from '../../contexts/ThemeContext';
 
 import { useAuth } from '../../contexts/AuthContext';
 import { useGraphContext } from '../../contexts/GraphContext';
+import pluralize from 'pluralize';
 
 // graphQL
 import graphqlClient from '../../graphql/graphqlClient';
@@ -29,6 +27,8 @@ import { GET_SINGLE_GRAPH } from '../../graphql/queries';
 import { SAVE_GRAPH } from '../../graphql/mutations';
 
 
+// Custom node component for representing database tables
+// Memoized for performance optimization in large graphs
 const TableNode = React.memo(({ data, id, selected }) => (
   <div
     style={{
@@ -53,25 +53,27 @@ const TableNode = React.memo(({ data, id, selected }) => (
     >
       {data.label}
     </div>
-    {data.columns.map((col, index) => (
-      <div key={index}>
-        <Handle
-          type='source'
-          position={Position.Right}
-          id={col.name}
-          style={{ background: '#555' }}
-        />
-        <Handle
-          type='target'
-          position={Position.Left}
-          id={col.name}
-          style={{ background: '#555' }}
-        />
-        <span style={{ color: '#6bf' }}>{col.name}</span>
-        <span style={{ color: '#f86' }}>({col.type})</span>
-        {col.required && <span style={{ color: '#fc6' }}> NOT NULL</span>}
-      </div>
-    ))}
+    {data.columns &&
+      data.columns.fields &&
+      data.columns.fields.map((col, index) => (
+        <div key={index}>
+          <Handle
+            type='source'
+            position={Position.Right}
+            id={col.name}
+            style={{ background: '#555' }}
+          />
+          <Handle
+            type='target'
+            position={Position.Left}
+            id={col.name}
+            style={{ background: '#555' }}
+          />
+          <span style={{ color: '#6bf' }}>{col.name}</span>
+          <span style={{ color: '#f86' }}>({col.type})</span>
+          {col.required && <span style={{ color: '#fc6' }}> NOT NULL</span>}
+        </div>
+      ))}
   </div>
 ));
 
@@ -88,6 +90,8 @@ const colorScheme = [
   '#ff9ff3',
 ];
 
+// Custom edge component to visualize relationships between tables
+// Allows for custom styling and labels on edges
 const CustomEdge = ({
   id,
   sourceX,
@@ -145,8 +149,9 @@ const edgeTypes = {
   custom: CustomEdge,
 };
 
+// Main component for visualizing and editing database schemas
 const SchemaVisualizer = ({ sqlContents, handleUploadBtn }) => {
-  const navigate = useNavigate();
+  //declare state variables for component
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [selectedNode, setSelectedNode] = useState(null);
@@ -154,14 +159,23 @@ const SchemaVisualizer = ({ sqlContents, handleUploadBtn }) => {
   const reactFlowWrapper = useRef(null);
   const [reactFlowInstance, setReactFlowInstance] = useState(null);
   const { darkMode } = useTheme();
+  const [primaryKeys, setPrimaryKeys] = useState([]);
 
-  // TODO - send request to server to request graph_name, graph_id, nodes_string, edges_string
+  //define hooks
+  const navigate = useNavigate();
   const { username } = useAuth();
   const { graphName, setGraphName } = useGraphContext();
-  // const { graphId, setGraphId } = useGraphContext();  -- to be managed as URL param
+
   // get URL params
   const { userId, graphId } = useParams();
 
+  //handleSetEdges updates edges state variable
+  const handleSetEdges = (newEdges) => {
+    setEdges(newEdges);
+  };
+
+  // Fetch graph data from the server on component mount
+  // This allows for persistent storage and retrieval of user's graph data
   useEffect(() => {
     const fetchGraphData = async () => {
       // fetch graph data from server
@@ -170,19 +184,30 @@ const SchemaVisualizer = ({ sqlContents, handleUploadBtn }) => {
         const response = await graphqlClient(GET_SINGLE_GRAPH, { graphId });
         let { graph } = response.data.data;
         let serverNodes, serverEdges;
-        graph.nodes === '' ? serverNodes = [] : serverNodes = JSON.parse(graph.nodes);
-        graph.edges === '' ? serverEdges = [] : serverEdges = JSON.parse(graph.edges);
-        setGraphName(graph.graphName);
-        setNodes(serverNodes);
-        setEdges(serverEdges);
+        graph.nodes === ''
+          ? (serverNodes = [])
+          : (serverNodes = JSON.parse(graph.nodes));
+        graph.edges === ''
+          ? (serverEdges = [])
+          : (serverEdges = JSON.parse(graph.edges));
+        //set initial node and edge states from database stored graph
+        await setGraphName(graph.graphName);
+        await setNodes(serverNodes);
+        await setEdges(serverEdges);
+        setPrimaryKeys(
+          serverNodes.map((node) => node.dbTableName + '.' + node.primaryKey)
+        );
       } catch (err) {
         console.log('Error fetching graph:', err);
         navigate('/dashboard');
       }
-    }
+    };
     fetchGraphData();
-  }, [])
+  }, []);
 
+  // Save the current graph state to the server
+  // This function is called when the user clicks the save button
+  // Allows for persistence of user's work across sessions
   const handleSaveBtn = async () => {
     // save functionality
     // convert nodes and edges to string
@@ -206,20 +231,26 @@ const SchemaVisualizer = ({ sqlContents, handleUploadBtn }) => {
       console.log(`Unable to save graph ${graphName}`);
       console.log(err);
     }
-  }
+  };
 
-  // tab state variables
+  //function handles setter for updating primary keys state variable
+  const handleSetPrimaryKeys = () => {
+    setPrimaryKeys(tables.map((table) => table.id + '.' + table.primaryKey));
+  };
+
+  // Toggle the generation tab visibility
+  // This function is called when the user clicks the generate button
+  // Separates the graph visualization from code generation for a cleaner UI
   const [genTabOpen, setGenTabOpen] = useState(false);
-  const handleGenTabOpen = () =>{
-    console.log('clicked generate button')
-    // setGenTabOpen(true)
-    setGenTabOpen(prev => !prev);
-    console.log('genTabOpen', genTabOpen)
+  const handleGenTabOpen = () => {
+    setGenTabOpen((prev) => !prev);
   };
-  const handleGenTabClose = () =>{
-    setGenTabOpen(false)
+  const handleGenTabClose = () => {
+    setGenTabOpen(false);
   };
 
+  // Remove a node from the graph and clean up related edges
+  // This function ensures graph consistency when deleting nodes
   const deleteNode = useCallback(
     (id) => {
       setNodes((prevNodes) => prevNodes.filter((node) => node.id !== id));
@@ -234,6 +265,9 @@ const SchemaVisualizer = ({ sqlContents, handleUploadBtn }) => {
     [setNodes, setEdges, selectedNode]
   );
 
+  // Select a node and focus the view on it
+  // This function enhances user experience by highlighting the selected node
+  // and its immediate relationships
   const selectNode = useCallback(
     (id) => {
       setSelectedNode(id);
@@ -266,29 +300,8 @@ const SchemaVisualizer = ({ sqlContents, handleUploadBtn }) => {
     [setNodes, setEdges, nodes, reactFlowInstance]
   );
 
-  // const wholeView = useCallback(() => {
-  //   setFocusMode(false);
-  //   setSelectedNode(null);
-  //   setNodes((nds) =>
-  //     nds.map((node) => ({
-  //       ...node,
-  //       selected: false,
-  //     }))
-  //   );
-  //   setEdges((eds) =>
-  //     eds.map((edge) => ({
-  //       ...edge,
-  //       data: {
-  //         ...edge.data,
-  //         hidden: false,
-  //       },
-  //     }))
-  //   );
-  //   if (reactFlowInstance) {
-  //     reactFlowInstance.fitView({ padding: 0.2, includeHiddenNodes: true });
-  //   }
-  // }, [setNodes, setEdges, reactFlowInstance]);
-
+  // Add a new node to the graph
+  // This function is used when the user wants to manually add a new table
   const addNode = useCallback(
     (newNode) => {
       const nodeId = `table-${nodes.length + 1}`;
@@ -300,24 +313,41 @@ const SchemaVisualizer = ({ sqlContents, handleUploadBtn }) => {
       }
 
       const newTableNode = {
-        id: nodeId,
+        id: newNode.name,
         type: 'table',
         position,
+        primaryKey: newNode.fields[0].name,
         data: {
           label: newNode.name,
-          columns: newNode.fields.map((field) => ({
-            name: field.name,
-            type: field.type,
-            required: field.required,
-          })),
+          columns: {
+            fields: newNode.fields.map((field) => ({
+              name: field.name,
+              type: field.type,
+              required: field.required,
+              isForeignKey: field.isForeignKey,
+            })),
+            primaryKey: newNode.fields[0].name,
+          },
         },
       };
-
+      //link to database table
+      const dbTable = pluralize(newNode.name).replace(
+        /^./,
+        newNode.name[0].toLowerCase()
+      );
+      //add primary key to primaryKeys array
+      const newPrimaryKeys = [
+        ...primaryKeys,
+        dbTable + '.' + newTableNode.data.columns.primaryKey,
+      ];
+      setPrimaryKeys(newPrimaryKeys);
       setNodes((nds) => [...nds, newTableNode]);
     },
-    [nodes, reactFlowInstance, setNodes]
+    [nodes, reactFlowInstance, setNodes, setPrimaryKeys]
   );
 
+  // Edit an existing node in the graph
+  // This function allows users to modify table structures after initial creation
   const editNode = useCallback(
     (nodeId, updatedNode) => {
       setNodes((nds) =>
@@ -328,11 +358,14 @@ const SchemaVisualizer = ({ sqlContents, handleUploadBtn }) => {
                 data: {
                   ...node.data,
                   label: updatedNode.name,
-                  columns: updatedNode.fields.map((field) => ({
-                    name: field.name,
-                    type: field.type,
-                    required: field.required,
-                  })),
+                  columns: {
+                    fields: updatedNode.fields.map((field) => ({
+                      name: field.name,
+                      type: field.type,
+                      required: field.required,
+                      isForeignKey: field.isForeignKey,
+                    })),
+                  },
                 },
               }
             : node
@@ -342,12 +375,14 @@ const SchemaVisualizer = ({ sqlContents, handleUploadBtn }) => {
     [setNodes]
   );
 
+  // Parse SQL contents and update the graph
+  // This effect runs when new SQL content is uploaded, automating the graph creation process
   useEffect(() => {
     if (sqlContents.length > 0) {
       const { nodes: newNodes, edges: newEdges } = parseSqlSchema(
         sqlContents[sqlContents.length - 1]
       );
-
+      //color connections in the node graph
       const coloredEdges = newEdges.map((edge, index) => ({
         ...edge,
         type: 'custom',
@@ -358,35 +393,58 @@ const SchemaVisualizer = ({ sqlContents, handleUploadBtn }) => {
         },
         style: { stroke: colorScheme[index % colorScheme.length] },
       }));
-
+      //set initial states from schema parser algorithm output
+      setPrimaryKeys(
+        newNodes.map((node) => node.dbTableName + '.' + node.primaryKey)
+      );
       setNodes(newNodes);
       setEdges(coloredEdges);
-
       if (reactFlowInstance) {
         setTimeout(() => {
           reactFlowInstance.fitView({ padding: 0.1, includeHiddenNodes: true });
         }, 100);
       }
     }
-  }, [sqlContents, setNodes, setEdges, reactFlowInstance]);
+  }, [sqlContents, setNodes, setEdges, setPrimaryKeys, reactFlowInstance]);
 
+  // Render the schema visualizer component
+  // This includes the node list, graph area, and generation tab
   return (
     <div className='schema-visualizer'>
-      <GenerateTab open={genTabOpen} onClose={handleGenTabClose} nodes={nodes} edges={edges} />
+      <GenerateTab
+        open={genTabOpen}
+        onClose={handleGenTabClose}
+        nodes={nodes}
+        edges={edges}
+      />
       <NodeList
         tables={nodes}
+        relationships={edges}
+        handleSetEdges={handleSetEdges}
         onSelectTable={selectNode}
         onDeleteTable={deleteNode}
         onAddNode={addNode}
         onEditNode={editNode}
         selectedTableId={selectedNode}
+        primaryKeys={primaryKeys}
+        colorScheme={colorScheme}
       />
       <ReactFlowProvider>
-      <div className={`node-graph-container ${darkMode ? 'dark' : ''}`} ref={reactFlowWrapper}>
-          
-          <div className="graph-btn-container">
-            <button className="btn-generate btn-graph" onClick={handleGenTabOpen} disabled={!reactFlowInstance}>Generate</button>
-            <button className="btn-save btn-graph" onClick={handleSaveBtn}>Save</button>
+        <div
+          className={`node-graph-container ${darkMode ? 'dark' : ''}`}
+          ref={reactFlowWrapper}
+        >
+          <div className='graph-btn-container'>
+            <button
+              className='btn-generate btn-graph'
+              onClick={handleGenTabOpen}
+              disabled={!reactFlowInstance}
+            >
+              Generate
+            </button>
+            <button className='btn-save btn-graph' onClick={handleSaveBtn}>
+              Save
+            </button>
           </div>
 
           <ReactFlow
@@ -403,8 +461,20 @@ const SchemaVisualizer = ({ sqlContents, handleUploadBtn }) => {
             onInit={setReactFlowInstance}
           >
             <Background color={darkMode ? '#333' : '#aaa'} gap={16} />
-            <Controls style={{ background: darkMode ? '#333' : '#fff', color: darkMode ? '#fff' : '#000', border: 'none' }}/>
-            <MiniMap style={{ background: darkMode ? '#333' : '#f0f0f0', maskColor: darkMode ? '#666' : '#ccc' }} nodeColor={darkMode ? '#666' : '#ccc'}/>
+            <Controls
+              style={{
+                background: darkMode ? '#333' : '#fff',
+                color: darkMode ? '#fff' : '#000',
+                border: 'none',
+              }}
+            />
+            <MiniMap
+              style={{
+                background: darkMode ? '#333' : '#f0f0f0',
+                maskColor: darkMode ? '#666' : '#ccc',
+              }}
+              nodeColor={darkMode ? '#666' : '#ccc'}
+            />
           </ReactFlow>
         </div>
       </ReactFlowProvider>
